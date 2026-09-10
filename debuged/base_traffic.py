@@ -88,7 +88,7 @@ traffic_item.EndpointSet.add(
 
 cfg = traffic_item.ConfigElement.find()
 cfg.FrameRate.update(Type='percentLineRate', Rate='100')
-cfg.TransmissionControl.update(Type)
+cfg.TransmissionControl.update(Type='fixedDuration',Duration=4)
 
 # ============================================================
 # Step 5: Apply + Start
