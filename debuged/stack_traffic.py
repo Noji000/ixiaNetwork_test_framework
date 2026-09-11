@@ -85,33 +85,42 @@ print(f"✅ 连接完成: Tx={tx.ConnectionState}, Rx={rx.ConnectionState}")
 
 # ============================================================
 # Step 3: 设 L1Config（NovusHundredGigLan）
+#作用：IxNetwork 的 L1Config.CurrentType 返回的是小驼峰字符串（如 novusHundredGigLan）
+#，但访问子对象时需要用大驼峰属性名（如 NovusHundredGigLan）。这个字典做大小写转换。
 # ============================================================
-CTYPE_MAP = {
-    "tenFortyHundredGigLan": "TenFortyHundredGigLan",
-    "novusHundredGigLan": "NovusHundredGigLan",
-    "novus5GTenTwentyFiveGigLan": "Novus5GTenTwentyFiveGigLan",
-    "uhdOneHundredGigLan": "UhdOneHundredGigLan",
-    "aresOneFourHundredGigLan": "AresOneFourHundredGigLan",
-    "aresOneEightHundredGigLanQddC": "AresOneEightHundredGigLanQddC",
-    "aresOne1600G": "AresOne1600G",
-}
+#方法1，通过字典map映射的方式
+# CTYPE_MAP = {
+#     "tenFortyHundredGigLan": "TenFortyHundredGigLan",
+#     "novusHundredGigLan": "NovusHundredGigLan",
+#     "novus5GTenTwentyFiveGigLan": "Novus5GTenTwentyFiveGigLan",
+#     "uhdOneHundredGigLan": "UhdOneHundredGigLan",
+#     "aresOneFourHundredGigLan": "AresOneFourHundredGigLan",
+#     "aresOneEightHundredGigLanQddC": "AresOneEightHundredGigLanQddC",
+#     "aresOne1600G": "AresOne1600G",
+# }
+#
+#
+# def get_l1(vport):
+#     ctype = vport.L1Config.CurrentType
+#     prop = CTYPE_MAP.get(ctype, ctype)
+#     return getattr(vport.L1Config, prop)
 
-
+import re
 def get_l1(vport):
-    ctype = vport.L1Config.CurrentType
-    prop = CTYPE_MAP.get(ctype, ctype)
-    return getattr(vport.L1Config, prop)
+    portType = vport.L1Config.CurrentType
+    capitalizedCardType = re.sub('([a-zA-Z])', lambda x: x.groups()[0].upper(), portType, 1)
+    return getattr(vport.L1Config, capitalizedCardType)
 
 
-# Novus 上用属性直接赋值（Issue #22 验证 update() 在某些版本失效）
+# 这些属性就是 GUI 上端口 Physical Port Properties 页面的勾选项
 with BatchUpdate(ixnetwork):
     for vp in (tx, rx):
-        l1 = get_l1(vp)
+        l1 = get_l1(vp)                 #等价于  l1 = vport.L1Config.NovusHundredGigLan 基于此修改端口的属性
         l1.Speed = "speed100g"
         l1.SelectedSpeeds = ["speed100g"]
         l1.Loopback = False
-        l1.IeeeL1Defaults = False       # 取消 Use IEEE Media defaults
-        l1.EnabledFlowControl = False    # 取消 Enable Flow Control
+        l1.IeeeL1Defaults = False
+        l1.EnabledFlowControl = False
         l1.LaserOn = True
         l1.EnableAutoNegotiation = True
         l1.EnableRsFec = True            # 勾选 RS-FEC
@@ -140,7 +149,10 @@ traffic_item.EndpointSet.add(
 
 cfg = traffic_item.ConfigElement.find()[0]
 cfg.FrameRate.update(Type='percentLineRate', Rate=50)       # 50% 线速
-cfg.FrameSize.FixedSize = 128                                # 帧大小 128 字节
+cfg.FrameSize.update(Type='random',RandomMax=1500,RandomMin=64)
+# cfg.FrameSize.FixedSize = 128                               # 帧大小 128 字节
+
+
 cfg.TransmissionControl.update(Type='fixedFrameCount', FrameCount=10000)  # 发 10000 帧
 
 # --- Ethernet 字段（monkey-patch 已修复，直接用原写法）---
