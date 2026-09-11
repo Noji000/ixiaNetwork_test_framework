@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IxNetwork RestPy 流量 Stack 构建操作文档</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card-bg: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --accent-2: #3fb950;
+    --warn: #d29922;
+    --danger: #f85149;
+    --code-bg: #1c2128;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 0;
+  }
+  .header {
+    background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 48px 36px;
+  }
+  .header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .header .subtitle {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+  .header .meta {
+    margin-top: 16px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .header .meta span {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 4px 12px;
+    border-radius: 4px;
+  }
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 48px 64px;
+  }
+  .toc {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin-bottom: 40px;
+  }
+  .toc h2 {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .toc ol {
+    padding-left: 20px;
+  }
+  .toc li {
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+  }
+  .toc a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .toc a:hover { text-decoration: underline; }
+  section {
+    margin-bottom: 48px;
+  }
+  h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h2 .step-num {
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 0.8rem;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: var(--accent);
+  }
+  p {
+    margin-bottom: 12px;
+    font-size: 0.92rem;
+  }
+  code.inline {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #f0883e;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    overflow-x: auto;
+    margin: 12px 0 16px;
+  }
+  pre code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #e6edf3;
+  }
+  /* syntax highlight */
+  .kw { color: #ff7b72; }
+  .str { color: #a5d6ff; }
+  .cmt { color: #8b949e; font-style: italic; }
+  .fn { color: #d2a8ff; }
+  .num { color: #79c0ff; }
+  .cls { color: #ffa657; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 16px;
+    font-size: 0.88rem;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+  }
+  th {
+    background: var(--card-bg);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  td code {
+    color: #f0883e;
+    font-family: 'Consolas', monospace;
+    font-size: 0.83rem;
+  }
+  .callout {
+    border-left: 4px solid;
+    border-radius: 0 6px 6px 0;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: 0.88rem;
+  }
+  .callout-warn {
+    border-color: var(--warn);
+    background: rgba(210, 153, 34, 0.08);
+  }
+  .callout-danger {
+    border-color: var(--danger);
+    background: rgba(248, 81, 73, 0.08);
+  }
+  .callout-info {
+    border-color: var(--accent);
+    background: rgba(88, 166, 255, 0.08);
+  }
+  .callout-success {
+    border-color: var(--accent-2);
+    background: rgba(63, 185, 80, 0.08);
+  }
+  .callout-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .callout-warn .callout-title { color: var(--warn); }
+  .callout-danger .callout-title { color: var(--danger); }
+  .callout-info .callout-title { color: var(--accent); }
+  .callout-success .callout-title { color: var(--accent-2); }
+
+  .source {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    margin-bottom: 16px;
+    padding-left: 12px;
+    border-left: 2px solid var(--border);
+  }
+  .source a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .source a:hover { text-decoration: underline; }
+
+  .flow-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+  }
+  .flow-node {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  .flow-node.eth { border-color: var(--accent); color: var(--accent); }
+  .flow-node.ipv4 { border-color: var(--accent-2); color: var(--accent-2); }
+  .flow-node.tcp { border-color: var(--warn); color: var(--warn); }
+  .flow-arrow {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+  }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .field-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .field-card .field-title {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .field-card .field-detail {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+  .field-card .field-detail strong {
+    color: var(--text);
+  }
+
+  .ref-list {
+    list-style: none;
+    counter-reset: ref-counter;
+  }
+  .ref-list li {
+    counter-increment: ref-counter;
+    margin-bottom: 8px;
+    padding-left: 28px;
+    position: relative;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .ref-list li::before {
+    content: "[" counter(ref-counter) "]";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .ref-list a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .ref-list a:hover { text-decoration: underline; }
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+    margin-top: 48px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>IxNetwork RestPy 流量 Stack 构建操作文档</h1>
+  <p class="subtitle">Novus Hundred Gig 100G · IxNetwork 9.20 · Ethernet → IPv4 → TCP 协议栈</p>
+  <div class="meta">
+    <span>硬件: Novus 100G</span>
+    <span>IxNetwork: 9.20.2112.6</span>
+    <span>RestPy: 1.12.1</span>
+    <span>Python: 3.11.4</span>
+    <span>日期: 2026-09-11</span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- TOC -->
+<div class="toc">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#overview">概述与环境信息</a></li>
+    <li><a href="#step0">Step 0: InstanceId Bug 修复补丁</a></li>
+    <li><a href="#step1">Step 1: 连接 Session</a></li>
+    <li><a href="#step2">Step 2: 端口映射与连接</a></li>
+    <li><a href="#step3">Step 3: L1Config 配置 (100G + RS-FEC)</a></li>
+    <li><a href="#step4">Step 4: 流量 Stack 构建</a></li>
+    <li><a href="#step5">Step 5: Apply + Start</a></li>
+    <li><a href="#step6">Step 6: 读取端口统计</a></li>
+    <li><a href="#step7">Step 7: 停止流量与收尾</a></li>
+    <li><a href="#caveats">注意事项</a></li>
+    <li><a href="#references">参考来源</a></li>
+  </ol>
+</div>
+
+<!-- Overview -->
+<section id="overview">
+  <h2>概述与环境信息</h2>
+  <p>本文档描述使用 <code class="inline">ixnetwork_restpy</code> 通过 REST API 自动化构建 IxNetwork 流量协议栈的完整流程。脚本覆盖从 Session 连接、端口映射、L1 层配置、流量 Stack 逐层添加（Ethernet → IPv4 → TCP）、流量下发与启动、到端口统计读取的全链路操作。</p>
+  
+  <h3>协议栈结构</h3>
+  <div class="flow-diagram">
+    <div class="flow-node eth">Ethernet II</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node ipv4">IPv4</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node tcp">TCP</div>
+  </div>
+
+  <h3>环境信息</h3>
+  <table>
+    <tr><th>项目</th><th>值</th></tr>
+    <tr><td>IxNetwork API Server</td><td><code>9.20.2112.6</code></td></tr>
+    <tr><td>ixnetwork-restpy</td><td><code>1.12.1</code></td></tr>
+    <tr><td>Python</td><td><code>3.11.4</code></td></tr>
+    <tr><td>硬件平台</td><td>Novus Hundred Gig LAN (100G)</td></tr>
+    <tr><td>Chassis IP</td><td><code>192.168.27.10</code></td></tr>
+    <tr><td>端口</td><td>Card 2, Port 2 (Tx) / Card 2, Port 3 (Rx)</td></tr>
+    <tr><td>REST 端口</td><td><code>11009</code></td></tr>
+  </table>
+
+  <div class="callout callout-info">
+    <span class="callout-title">来源说明</span>
+    RestPy 官方文档、API Reference 及示例脚本托管于 OpenIxia GitHub。SessionAssistant / PortMapAssistant 的接口定义参见源码 [$TRAE_REF](https://github.com/OpenIxia/ixnetwork_restpy/blob/master/README.md)；流量 Stack 构建的标准写法参见官方示例 <code class="inline">createTrafficItemAddPacketHeader.py</code> [$TRAE_REF](https://github.com/OpenIxia/IxNetwork/blob/master/RestPy/SampleScripts/createTrafficItemAddPacketHeader.py)。
+  </div>
+</section>
+
+<!-- Step 0 -->
+<section id="step0">
+  <h2><span class="step-num">0</span>InstanceId Bug 修复补丁</h2>
+
+  <h3>问题现象</h3>
+  <p>在 IxNetwork 9.20 环境下，使用 RestPy 修改 Traffic Stack Field 属性时（如 <code class="inline">field.ValueType = 'increment'</code>），服务端返回 <code class="inline">400 BadRequestError: InstanceId is not a string</code>。</p>
+
+  <div class="callout callout-danger">
+    <span class="callout-title">错误堆栈</span>
+    <pre><code>BadRequestError: InstanceId is not a string
+System.Exception: InstanceId is not a string
+   at SDMCsLib.SDMObjIdPiece.GetIdAsString()
+   at IxNetwork.Traffic2.Publishers.StackFieldHandler.Find(...)
+   at SDMHelpers.WalkContext.walkTo(...)
+   at SDMCsLib.RestService.SdmObject.Patch()
+   at SDMCsLib.RestService.V1ObjectController.Patch(String path)</code></pre>
+  </div>
+
+  <h3>根因分析</h3>
+  <p>RestPy 的 <code class="inline">Base._update()</code> 方法在构造 PATCH 请求时，自动将对象的 <code class="inline">id</code> 字段放入 payload body 中，并将请求发送到<strong>集合端点</strong>（如 <code class="inline">/stack/1/field</code>），而非具体资源端点（如 <code class="inline">/stack/1/field/1</code>）。</p>
+  <p>IxNetwork 服务端的 <code class="inline">StackFieldHandler.Find()</code> 在解析 payload body 中的 <code class="inline">id</code> 字段时，调用 <code class="inline">SDMObjIdPiece.GetIdAsString()</code> 试图将其转为字符串，但该字段在此上下文中不是合法的 SDM 对象 ID 格式，导致异常。</p>
+
+  <div class="callout callout-info">
+    <span class="callout-title">来源</span>
+    该问题在 OpenIxia GitHub Issue #138 中有完整记录，用户在修改 Ethernet Destination MAC 字段时触发完全相同的错误 [$TRAE_REF](https://github.com/OpenIxia/IxNetwork/issues/138)。
+  </div>
+
+  <h3>调试发现</h3>
+  <p>通过在 <code class="inline">Connection._update</code> 层面拦截 PATCH 请求，捕获到实际的 HTTP 请求内容：</p>
+  <pre><code><span class="cmt"># 实际发送的 PATCH 请求</span>
+<span class="cmt"># href: 集合端点（不包含具体 field id）</span>
+PATCH /api/v1/sessions/1/ixnetwork/traffic/trafficItem/1/configElement/1/stack/1/field
+
+<span class="cmt"># payload: id 在 body 中</span>
+{
+  <span class="str">"valueType"</span>: <span class="str">"increment"</span>,
+  <span class="str">"id"</span>: <span class="str">"1"</span>       <span class="cmt"># ← StackFieldHandler 无法解析</span>
+}</code></pre>
+
+  <h3>修复方案</h3>
+  <p>Monkey-patch <code class="inline">Connection._update</code>：如果 payload 中包含 <code class="inline">id</code> 字段，则将其从 payload 中移除，并拼接到 URL 路径中，变为对具体资源端点的 PATCH。</p>
+
+  <pre><code><span class="kw">import</span> ixnetwork_restpy.connection <span class="kw">as</span> conn_mod
+
+_original_conn_update = Connection._update
+
+<span class="kw">def</span> <span class="fn">_patched_conn_update</span>(self, href, payload):
+    <span class="kw">if</span> <span class="kw">isinstance</span>(payload, <span class="cls">dict</span>) <span class="kw">and</span> <span class="str">'id'</span> <span class="kw">in</span> payload:
+        <span class="cmt"># 将 id 移到 URL 路径中</span>
+        obj_id = payload[<span class="str">'id'</span>]
+        item_href = href.rstrip(<span class="str">'/'</span>) + <span class="str">'/'</span> + <span class="kw">str</span>(obj_id)
+        new_payload = {k: v <span class="kw">for</span> k, v <span class="kw">in</span> payload.items() <span class="kw">if</span> k != <span class="str">'id'</span>}
+        <span class="kw">return</span> _original_conn_update(self, item_href, new_payload)
+    <span class="kw">elif</span> <span class="kw">isinstance</span>(payload, <span class="cls">list</span>):
+        new_payload = [
+            {k: v <span class="kw">for</span> k, v <span class="kw">in</span> item.items() <span class="kw">if</span> k != <span class="str">'id'</span>}
+            <span class="kw">if</span> <span class="kw">isinstance</span>(item, <span class="cls">dict</span>) <span class="kw">and</span> <span class="str">'id'</span> <span class="kw">in</span> item <span class="kw">else</span> item
+            <span class="kw">for</span> item <span class="kw">in</span> payload
+        ]
+        <span class="kw">return</span> _original_conn_update(self, href, new_payload)
+    <span class="kw">return</span> _original_conn_update(self, href, payload)
+
+Connection._update = _patched_conn_update</code></pre>
+
+  <div class="callout callout-success">
+    <span class="callout-title">修复效果</span>
+    修复后的 PATCH 请求变为：<code class="inline">PATCH /stack/1/field/1</code> + payload <code class="inline">{"valueType": "increment"}</code>，服务器从 URL 路径直接识别资源，绕过 StackFieldHandler.Find() 的解析问题。
+  </div>
+
+  <p class="source">来源：GitHub Issue #138 - Ethernet destination field cannot be updated [$TRAE_REF](https://github.com/OpenIxia/IxNetwork/issues/138)；RestPy Connection 源码 [$TRAE_REF](https://github.com/OpenIxia/ixnetwork_restpy/blob/master/ixnetwork_restpy/connection.py)；Field 类源码 [$TRAE_REF](https://github.com/OpenIxia/ixnetwork_restpy/blob/master/ixnetwork_restpy/testplatform/sessions/ixnetwork/traffic/trafficitem/configelement/stack/field/field.py)</p>
+</section>
+
+<!-- Step 1 -->
+<section id="step1">
+  <h2><span class="step-num">1</span>连接 Session</h2>
+  <p>使用 <code class="inline">SessionAssistant</code> 创建与 IxNetwork REST API Server 的连接会话。</p>
+
+  <pre><code>session = <span class="cls">SessionAssistant</span>(
+    IpAddress=<span class="str">'127.0.0.1'</span>, RestPort=<span class="num">11009</span>,
+    UserName=<span class="kw">None</span>, Password=<span class="kw">None</span>,
+    VerifyCertificates=<span class="kw">False</span>,
+    LogLevel=<span class="cls">SessionAssistant</span>.LOGLEVEL_INFO,
+    ClearConfig=<span class="kw">True</span>,  <span class="cmt"># 清空已有配置</span>
+)
+ixnetwork = session.Ixnetwork</code></pre>
+
+  <table>
+    <tr><th>参数</th><th>说明</th></tr>
+    <tr><td><code>IpAddress</code></td><td>IxNetwork API Server 地址（本机则 127.0.0.1）</td></tr>
+    <tr><td><code>RestPort</code></td><td>REST API 端口，默认 11009</td></tr>
+    <tr><td><code>VerifyCertificates</code></td><td>是否校验 SSL 证书（测试环境通常 False）</td></tr>
+    <tr><td><code>ClearConfig</code></td><td>True 表示连接后清空已有配置，从空白开始</td></tr>
+    <tr><td><code>LogLevel</code></td><td>日志级别：LOGLEVEL_INFO / LOGLEVEL_DEBUG</td></tr>
+  </table>
+
+  <p class="source">来源：SessionAssistant 源码 [$TRAE_REF](https://github.com/OpenIxia/ixnetwork_restpy/blob/master/ixnetwork_restpy/assistants/sessions/sessionassistant.py)；RestPy README [$TRAE_REF](https://github.com/OpenIxia/ixnetwork_restpy/blob/master/README.md)</p>
+</section>
+
+<!-- Step 2 -->
+<section id="step2">
+  <h2><span class="step-num">2</span>端口映射与连接</h2>
+  <p>使用 <code class="inline">PortMapAssistant</code> 将虚拟端口映射到物理机箱端口并连接。</p>
+
+  <pre><code>port_map = session.PortMapAssistant()
+port_map.Map(<span class="str">'192.168.27.10'</span>, <span class="num">2</span>, <span class="num">2</span>, Name=<span class="str">'Tx'</span>)  <span class="cmt"># Chassis IP, Card, Port</span>
+port_map.Map(<span class="str">'192.168.27.10'</span>, <span class="num">2</span>, <span class="num">3</span>, Name=<span class="str">'Rx'</span>)
+port_map.Connect(ForceOwnership=<span class="kw">True</span>, IgnoreLinkUp=<span class="kw">True</span>)
+
+tx = ixnetwork.Vport.find(Name=<span class="str">'Tx'</span>)
+rx = ixnetwork.Vport.find(Name=<span class="str">'Rx'</span>)</code></pre>
+
+  <table>
+    <tr><th>参数</th><th>说明</th></tr>
+    <tr><td><code>Map(IP, Card, Port, Name)</code></td><td>机箱 IP、卡号、端口号、虚拟端口名称</td></tr>
+    <tr><td><code>ForceOwnership</code></td><td>强制获取端口所有权（抢占其他用户的连接）</td></tr>
+    <tr><td><code>IgnoreLinkUp</code></td><td>忽略 Link Up 检查，允许在 Link Down 时继续</td></tr>
+  </table>
+
+  <div class="callout callout-warn">
+    <span class="callout-title">注意</span>
+    <code class="inline">IgnoreLinkUp=True</code> 会让脚本在物理链路未就绪时也能继续执行。如果需要验证真实链路状态，应设为 <code class="inline">False</code>。日志中会显示 <code class="inline">Bypassing link state check</code> 警告。
+  </div>
+
+  <p class="source">来源：PortMapAssistant 源码 [$TRAE_REF](https://github.com/OpenIxia/ixnetwork_restpy/blob/master/ixnetwork_restpy/assistants/ports/portmapassistant.py)；RestPy README 示例 [$TRAE_REF](https://github.com/OpenIxia/ixnetwork_restpy/blob/master/README.md)</p>
+</section>
+
+<!-- Step 3 -->
+<section id="step3">
+  <h2><span class="step-num">3</span>L1Config 配置 (100G + RS-FEC)</h2>
+  <p>根据硬件类型获取对应的 L1Config 对象，配置速率为 100G 并启用 RS-FEC。</p>
+
+  <pre><code><span class="cmt"># L1Config 类型映射表</span>
+CTYPE_MAP = {
+    <span class="str">"tenFortyHundredGigLan"</span>: <span class="str">"TenFortyHundredGigLan"</span>,
+    <span class="str">"novusHundredGigLan"</span>: <span class="str">"NovusHundredGigLan"</span>,
+    <span class="str">"uhdOneHundredGigLan"</span>: <span class="str">"UhdOneHundredGigLan"</span>,
+    <span class="cmt"># ... 其他类型</span>
+}
+
+<span class="kw">def</span> <span class="fn">get_l1</span>(vport):
+    ctype = vport.L1Config.CurrentType
+    prop = CTYPE_MAP.get(ctype, ctype)
+    <span class="kw">return</span> <span class="fn">getattr</span>(vport.L1Config, prop)
+
+<span class="cmt"># 使用 BatchUpdate 批量提交</span>
+<span class="kw">with</span> <span class="cls">BatchUpdate</span>(ixnetwork):
+    <span class="kw">for</span> vp <span class="kw">in</span> (tx, rx):
+        l1 = <span class="fn">get_l1</span>(vp)
+        l1.Speed = <span class="str">"speed100g"</span>
+        l1.SelectedSpeeds = [<span class="str">"speed100g"</span>]
+        l1.IeeeL1Defaults = <span class="kw">False</span>        <span class="cmt"># 取消 IEEE Media defaults</span>
+        l1.EnabledFlowControl = <span class="kw">False</span>     <span class="cmt"># 取消 Flow Control</span>
+        l1.LaserOn = <span class="kw">True</span>
+        l1.EnableAutoNegotiation = <span class="kw">True</span>
+        l1.EnableRsFec = <span class="kw">True</span>             <span class="cmt"># 启用 RS-FEC</span></code></pre>
+
+  <table>
+    <tr><th>L1Config 属性</th><th>设置值</th><th>说明</th></tr>
+    <tr><td><code>Speed</code></td><td><code>speed100g</code></td><td>链路速率 100G</td></tr>
+    <tr><td><code>SelectedSpeeds</code></td><td><code>["speed100g"]</code></td><td>可选速度列表</td></tr>
+    <tr><td><code>IeeeL1Defaults</code></td><td><code>False</code></td><td>不使用 IEEE Media 默认值</td></tr>
+    <tr><td><code>EnabledFlowControl</code></td><td><code>False</code></td><td>禁用流控</td></tr>
+    <tr><td><code>EnableRsFec</code></td><td><code>True</code></td><td>启用 RS-FEC（前向纠错）</td></tr>
+    <tr><td><code>EnableAutoNegotiation</code></td><td><code>True</code></td><td>启用自协商</td></tr>
+    <tr><td><code>LaserOn</code></td><td><code>True</code></td><td>开启激光器</td></tr>
+  </table>
+
+  <div class="callout callout-info">
+    <span class="callout-title">BatchUpdate</span>
+    <code class="inline">BatchUpdate</code> 是 RestPy 的批量提交助手，可将多个属性修改合并为一次 REST call，显著减少网络开销。在 <code class="inline">with</code> 块退出时自动提交（commit）。
+  </div>
+
+  <p class="source">来源：RestPy Release Notes（BatchUpdate 说明）[$TRAE_REF](https://github.com/OpenIxia/ixnetwork_restpy/blob/master/RELEASENOTES.md)；assistants 目录 [$TRAE_REF](https://github.com/OpenIxia/ixnetwork_restpy/tree/master/ixnetwork_restpy/assistants)</p>
+</section>
+
+<!-- Step 4 -->
+<section id="step4">
+  <h2><span class="step-num">4</span>流量 Stack 构建</h2>
+
+  <h3>4.1 创建 TrafficItem</h3>
+  <pre><code>traffic_item = ixnetwork.Traffic.TrafficItem.add(
+    Name=<span class="str">'Raw Traffic'</span>, TrafficType=<span class="str">'raw'</span>,
+)
+traffic_item.EndpointSet.add(
+    Sources=tx.Protocols.find(),
+    Destinations=rx.Protocols.find(),
+)
+
+cfg = traffic_item.ConfigElement.find()[<span class="num">0</span>]
+cfg.FrameRate.update(Type=<span class="str">'percentLineRate'</span>, Rate=<span class="num">50</span>)       <span class="cmt"># 50% 线速</span>
+cfg.FrameSize.FixedSize = <span class="num">128</span>                                <span class="cmt"># 128 字节</span>
+cfg.TransmissionControl.update(Type=<span class="str">'fixedFrameCount'</span>, FrameCount=<span class="num">10000</span>)</code></pre>
+
+  <p class="source">来源：RestPy README TrafficItem 示例 [$TRAE_REF](https://github.com/OpenIxia/ixnetwork_restpy/blob/master/README.md)；官方示例 pcapToRawTrafficItem.py [$TRAE_REF](https://github.com/OpenIxia/IxNetwork/blob/master/RestPy/SampleScripts/pcapToRawTrafficItem.py)</p>
+
+  <h3>4.2 Ethernet 字段配置</h3>
+  <p>TrafficItem 创建后默认包含 Ethernet II stack。通过 <code class="inline">Stack.find(StackTypeId='ethernet$')</code> 获取，再通过 <code class="inline">Field.find(DisplayName=...)</code> 定位具体字段。</p>
+
+  <pre><code>ethernetStackObj = ixnetwork.Traffic.TrafficItem.find(
+    Name=<span class="str">'Raw Traffic'</span>
+).ConfigElement.find()[<span class="num">0</span>].Stack.find(StackTypeId=<span class="str">'ethernet$'</span>)
+
+<span class="cmt"># 目的 MAC（递增）</span>
+ethernetDstField = ethernetStackObj.Field.find(DisplayName=<span class="str">'Destination MAC Address'</span>)
+ethernetDstField.ValueType = <span class="str">'increment'</span>
+ethernetDstField.StartValue = <span class="str">"00:0c:29:68:05:1E"</span>
+ethernetDstField.StepValue = <span class="str">"00:00:00:00:00:00"</span>
+ethernetDstField.CountValue = <span class="num">1</span>
+
+<span class="cmt"># 源 MAC（递增）</span>
+ethernetSrcField = ethernetStackObj.Field.find(DisplayName=<span class="str">'Source MAC Address'</span>)
+ethernetSrcField.ValueType = <span class="str">'increment'</span>
+ethernetSrcField.StartValue = <span class="str">"00:0c:29:68:05:14"</span></code></pre>
+
+  <p class="source">来源：官方示例 pcapToRawTrafficItem.py 中 Ethernet Stack 字段操作 [$TRAE_REF](https://github.com/OpenIxia/IxNetwork/blob/master/RestPy/SampleScripts/pcapToRawTrafficItem.py)；Stack 类源码 [$TRAE_REF](https://github.com/OpenIxia/ixnetwork_restpy/blob/master/ixnetwork_restpy/testplatform/sessions/ixnetwork/traffic/trafficitem/configelement/stack/stack.py)；Field 类源码 [$TRAE_REF](https://github.com/OpenIxia/ixnetwork_restpy/blob/master/ixnetwork_restpy/testplatform/sessions/ixnetwork/traffic/trafficitem/configelement/stack/field/field.py)</p>
+
+  <h3>4.3 添加 IPv4 协议头 (ProtocolTemplate + Append)</h3>
+  <p>使用官方 <code class="inline">createTrafficItemAddPacketHeader.py</code> 示例的标准写法：先获取 ProtocolTemplate，再通过 <code class="inline">Stack.Append()</code> 追加到已有 Stack 之后。</p>
+
+  <pre><code><span class="kw">def</span> <span class="fn">createPacketHeader</span>(trafficItemObj, packetHeaderToAdd=<span class="kw">None</span>, appendToStack=<span class="kw">None</span>):
+    configElement = trafficItemObj.ConfigElement.find()[<span class="num">0</span>]
+    <span class="cmt"># 1. 获取协议模板</span>
+    protocolTemplate = ixnetwork.Traffic.ProtocolTemplate.find(
+        StackTypeId=packetHeaderToAdd
+    )
+    <span class="cmt"># 2. 找到要追加的位置</span>
+    appendToStackObj = configElement.Stack.find(StackTypeId=appendToStack)
+    <span class="cmt"># 3. 用 Append 方法添加</span>
+    appendToStackObj.Append(Arg2=protocolTemplate)
+    <span class="cmt"># 4. 获取新添加的 Stack</span>
+    newStack = configElement.Stack.find(StackTypeId=packetHeaderToAdd)
+    <span class="kw">return</span> newStack.Field
+
+<span class="cmt"># 添加 IPv4（追加到 Ethernet 之后）</span>
+ipv4FieldObj = createPacketHeader(
+    traffic_item,
+    packetHeaderToAdd=<span class="str">'ipv4'</span>,
+    appendToStack=<span class="str">'ethernet$'</span>,
+)
+
+<span class="cmt"># 源 IP（递增）</span>
+ipv4SrcField = ipv4FieldObj.find(DisplayName=<span class="str">'Source Address'</span>)
+ipv4SrcField.ValueType = <span class="str">'increment'</span>
+ipv4SrcField.StartValue = <span class="str">'1.1.1.1'</span>
+ipv4SrcField.StepValue = <span class="str">'0.0.0.1'</span>
+ipv4SrcField.CountValue = <span class="num">1</span>
+
+<span class="cmt"># 目的 IP（列表）</span>
+ipv4DstField = ipv4FieldObj.find(DisplayName=<span class="str">'Destination Address'</span>)
+ipv4DstField.ValueType = <span class="str">'valueList'</span>
+ipv4DstField.ValueList = [<span class="str">'1.1.1.2'</span>, <span class="str">'1.1.1.3'</span>, <span class="str">'1.1.1.4'</span>, <span class="str">'1.1.1.5'</span>]</code></pre>
+
+  <p class="source">来源：官方示例 createTrafficItemAddPacketHeader.py [$TRAE_REF](https://github.com/OpenIxia/IxNetwork/blob/master/RestPy/SampleScripts/createTrafficItemAddPacketHeader.py)</p>
+
+  <h3>4.4 添加 TCP 协议头</h3>
+  <p>同样使用 <code class="inline">createPacketHeader</code> 函数，将 TCP 追加到 IPv4 之后。</p>
+
+  <pre><code><span class="cmt"># 添加 TCP（追加到 IPv4 之后）</span>
+tcpFieldObj = createPacketHeader(
+    traffic_item,
+    packetHeaderToAdd=<span class="str">'tcp'</span>,
+    appendToStack=<span class="str">'ipv4'</span>,
+)
+
+<span class="cmt"># 源端口（递增）</span>
+tcpSrcPortField = tcpFieldObj.find(DisplayName=<span class="str">'TCP-Source-Port'</span>)
+tcpSrcPortField.ValueType = <span class="str">'increment'</span>
+tcpSrcPortField.StartValue = <span class="str">'1024'</span>
+tcpSrcPortField.StepValue = <span class="str">'1'</span>
+tcpSrcPortField.CountValue = <span class="num">1</span>
+
+<span class="cmt"># 目的端口（列表）</span>
+tcpDstPortField = tcpFieldObj.find(DisplayName=<span class="str">'TCP-Dest-Port'</span>)
+tcpDstPortField.ValueType = <span class="str">'valueList'</span>
+tcpDstPortField.ValueList = [<span class="str">'80'</span>, <span class="str">'443'</span>, <span class="str">'8080'</span>, <span class="str">'22'</span>]</code></pre>
+
+  <div class="callout callout-warn">
+    <span class="callout-title">DisplayName 命名规则</span>
+    TCP 字段的 DisplayName 使用 <strong>带前缀</strong> 格式：<code class="inline">TCP-Source-Port</code> 和 <code class="inline">TCP-Dest-Port</code>，而非 <code class="inline">Source-Port</code> / <code class="inline">Destination-Port</code>。错误的 DisplayName 会导致 <code class="inline">find()</code> 返回空列表，后续属性赋值触发 <code class="inline">IndexError: list index out of range</code>。建议添加协议后先遍历打印所有 Field 的 DisplayName 确认正确名称。
+  </div>
+
+  <p class="source">来源：官方示例 pcapToRawTrafficItem.py 中 TCP Stack 添加与端口字段操作 [$TRAE_REF](https://github.com/OpenIxia/IxNetwork/blob/master/RestPy/SampleScripts/pcapToRawTrafficItem.py)；GitHub Issue #47 - TCP stack 字段问题 [$TRAE_REF](https://github.com/OpenIxia/IxNetwork/issues/47)</p>
+
+  <h3>4.5 完整字段配置总览</h3>
+  <div class="field-grid">
+    <div class="field-card">
+      <div class="field-title">Ethernet - Destination MAC</div>
+      <div class="field-detail"><strong>ValueType:</strong> increment<br><strong>Start:</strong> 00:0c:29:68:05:1E<br><strong>Step:</strong> 00:00:00:00:00:00<br><strong>Count:</strong> 1</div>
+    </div>
+    <div class="field-card">
+      <div class="field-title">Ethernet - Source MAC</div>
+      <div class="field-detail"><strong>ValueType:</strong> increment<br><strong>Start:</strong> 00:0c:29:68:05:14<br><strong>Step:</strong> 00:00:00:00:00:00<br><strong>Count:</strong> 1</div>
+    </div>
+    <div class="field-card">
+      <div class="field-title">IPv4 - Source Address</div>
+      <div class="field-detail"><strong>ValueType:</strong> increment<br><strong>Start:</strong> 1.1.1.1<br><strong>Step:</strong> 0.0.0.1<br><strong>Count:</strong> 1</div>
+    </div>
+    <div class="field-card">
+      <div class="field-title">IPv4 - Destination Address</div>
+      <div class="field-detail"><strong>ValueType:</strong> valueList<br><strong>ValueList:</strong> 1.1.1.2, 1.1.1.3, 1.1.1.4, 1.1.1.5</div>
+    </div>
+    <div class="field-card">
+      <div class="field-title">TCP - Source Port</div>
+      <div class="field-detail"><strong>ValueType:</strong> increment<br><strong>Start:</strong> 1024<br><strong>Step:</strong> 1<br><strong>Count:</strong> 1</div>
+    </div>
+    <div class="field-card">
+      <div class="field-title">TCP - Destination Port</div>
+      <div class="field-detail"><strong>ValueType:</strong> valueList<br><strong>ValueList:</strong> 80, 443, 8080, 22</div>
+    </div>
+  </div>
+
+  <h3>ValueType 类型说明</h3>
+  <table>
+    <tr><th>ValueType</th><th>必需属性</th><th>说明</th></tr>
+    <tr><td><code>increment</code></td><td><code>StartValue</code>, <code>StepValue</code>, <code>CountValue</code></td><td>从起始值开始递增，共 Count 个值</td></tr>
+    <tr><td><code>valueList</code></td><td><code>ValueList</code></td><td>使用指定的值列表</td></tr>
+    <tr><td><code>singleValue</code></td><td><code>Value</code></td><td>固定单一值</td></tr>
+    <tr><td><code>random</code></td><td><code>StartValue</code>, <code>StepValue</code>, <code>CountValue</code></td><td>随机值</td></tr>
+  </table>
+
+  <p class="source">来源：Field 类源码中的 _SDM_ATT_MAP 定义了 ValueType、StartValue、StepValue、CountValue、ValueList 等属性 [$TRAE_REF](https://github.com/OpenIxia/ixnetwork_restpy/blob/master/ixnetwork_restpy/testplatform/sessions/ixnetwork/traffic/trafficitem/configelement/stack/field/field.py)</p>
+</section>
+
+<!-- Step 5 -->
+<section id="step5">
+  <h2><span class="step-num">5</span>Apply + Start</h2>
+  <p>配置完成后，必须先 <code class="inline">Apply</code> 再 <code class="inline">Start</code>。</p>
+
+  <pre><code>ixnetwork.Traffic.Apply()                           <span class="cmt"># 下发流量配置</span>
+ixnetwork.Traffic.StartStatelessTrafficBlocking()   <span class="cmt"># 启动无状态流量（阻塞等待启动完成）</span></code></pre>
+
+  <div class="callout callout-warn">
+    <span class="callout-title">注意</span>
+    修改 TrafficItem 字段后，服务端会产生 <code class="inline">[Traffic Generate required]</code> 警告。必须在 <code class="inline">Apply()</code> 之后才能 <code class="inline">Start()</code>，否则流量不会按新配置发送。
+  </div>
+</section>
+
+<!-- Step 6 -->
+<section id="step6">
+  <h2><span class="step-num">6</span>读取端口统计</h2>
+  <p>使用 <code class="inline">StatViewAssistant</code> 获取端口统计视图。</p>
+
+  <pre><code><span class="kw">import</span> time
+time.sleep(<span class="num">10</span>)  <span class="cmt"># 等待计数器积累</span>
+
+stats = session.StatViewAssistant(<span class="str">'Port Statistics'</span>, Timeout=<span class="num">10</span>)
+<span class="kw">for</span> row <span class="kw">in</span> stats.Rows:
+    <span class="fn">print</span>(f<span class="str">"[{row['Port Name']}] Link={row['Link State']} "</span>
+          f<span class="str">"LineSpeed={row['Line Speed']} "</span>
+          f<span class="str">"TxFrames={row['Frames Tx.']} "</span>
+          f<span class="str">"RxValid={row['Valid Frames Rx.']}"</span>)</code></pre>
+
+  <table>
+    <tr><th>统计字段</th><th>说明</th></tr>
+    <tr><td><code>Port Name</code></td><td>端口名称（Tx / Rx）</td></tr>
+    <tr><td><code>Link State</code></td><td>链路状态（Link Up / Link Down）</td></tr>
+    <tr><td><code>Line Speed</code></td><td>协商速率（如 100GE）</td></tr>
+    <tr><td><code>Frames Tx.</code></td><td>已发送帧数</td></tr>
+    <tr><td><code>Valid Frames Rx.</code></td><td>已接收有效帧数</td></tr>
+  </table>
+
+  <p class="source">来源：SessionAssistant.StatViewAssistant 接口 [$TRAE_REF](https://github.com/OpenIxia/ixnetwork_restpy/blob/master/ixnetwork_restpy/assistants/sessions/sessionassistant.py)；官方示例脚本目录 [$TRAE_REF](https://github.com/OpenIxia/IxNetwork/tree/master/RestPy/SampleScripts)</p>
+</section>
+
+<!-- Step 7 -->
+<section id="step7">
+  <h2><span class="step-num">7</span>停止流量与收尾</h2>
+  <pre><code><span class="kw">try</span>:
+    ixnetwork.Traffic.StopStatelessTrafficBlocking()
+    <span class="fn">print</span>(<span class="str">"测试停止"</span>)
+<span class="kw">except</span> <span class="cls">Exception</span>:
+    <span class="kw">pass</span></code></pre>
+</section>
+
+<!-- Caveats -->
+<section id="caveats">
+  <h2>注意事项</h2>
+
+  <div class="callout callout-danger">
+    <span class="callout-title">1. InstanceId is not a string（核心 Bug）</span>
+    <p>在 IxNetwork 9.20 及更早版本中，RestPy 修改 Traffic Stack Field 属性时会触发此错误。根因是 RestPy 将 <code class="inline">id</code> 放入 PATCH payload body 而非 URL 路径，服务端 <code class="inline">StackFieldHandler.Find()</code> 无法解析。必须安装 Step 0 的 monkey-patch 补丁才能正常工作。该问题在 GitHub Issue #138 中有记录 [$TRAE_REF](https://github.com/OpenIxia/IxNetwork/issues/138)。</p>
+  </div>
+
+  <div class="callout callout-warn">
+    <span class="callout-title">2. DisplayName 命名不统一</span>
+    <p>不同协议层的 Field DisplayName 命名规则不一致：</p>
+    <ul style="padding-left: 20px; margin: 8px 0;">
+      <li>Ethernet: <code class="inline">Destination MAC Address</code> / <code class="inline">Source MAC Address</code></li>
+      <li>IPv4: <code class="inline">Source Address</code> / <code class="inline">Destination Address</code></li>
+      <li>TCP: <code class="inline">TCP-Source-Port</code> / <code class="inline">TCP-Dest-Port</code>（带 <code class="inline">TCP-</code> 前缀）</li>
+    </ul>
+    <p>使用错误的 DisplayName 不会报错，但 <code class="inline">find()</code> 返回空列表，后续属性赋值会触发 <code class="inline">IndexError</code>。建议添加新协议后先遍历所有 Field 打印 DisplayName 确认。</p>
+  </div>
+
+  <div class="callout callout-warn">
+    <span class="callout-title">3. StackTypeId 通配符</span>
+    <p>Ethernet 的 StackTypeId 是 <code class="inline">ethernet$</code>（带 <code class="inline">$</code> 后缀），而 IPv4 和 TCP 分别是 <code class="inline">ipv4</code> 和 <code class="inline">tcp</code>（不带 <code class="inline">$</code>）。在 <code class="inline">Stack.find(StackTypeId=...)</code> 和 <code class="inline">appendToStack</code> 参数中必须使用正确的值。</p>
+  </div>
+
+  <div class="callout callout-warn">
+    <span class="callout-title">4. Apply 与 Start 顺序</span>
+    <p>修改 TrafficItem 后服务端会产生 <code class="inline">[Traffic Generate required]</code> 警告。必须调用 <code class="inline">Traffic.Apply()</code> 下发配置后才能 <code class="inline">Start()</code>，否则流量不会按新配置发送。</p>
+  </div>
+
+  <div class="callout callout-warn">
+    <span class="callout-title">5. IgnoreLinkUp 的影响</span>
+    <p><code class="inline">IgnoreLinkUp=True</code> 允许在物理链路未 Up 时继续执行。此时端口状态为 <code class="inline">connectedLinkDown</code>，流量虽然可以 Apply 但不会真正发送。如果看到 <code class="inline">TxFrames=0</code> 且 <code class="inline">RxValid=0</code>，应检查物理链路是否就绪。正常 Link Up 后端口状态为 <code class="inline">connectedLinkUp</code>。</p>
+  </div>
+
+  <div class="callout callout-warn">
+    <span class="callout-title">6. BatchUpdate 与 Field 属性赋值</span>
+    <p><code class="inline">BatchUpdate</code> 适用于 L1Config 等属性的批量提交。但 Traffic Stack Field 的属性赋值（<code class="inline">field.ValueType = '...'</code>）会立即触发单独的 PATCH 请求，不能被 BatchUpdate 延迟。monkey-patch 必须在 Field 属性赋值之前安装。</p>
+  </div>
+
+  <div class="callout callout-warn">
+    <span class="callout-title">7. 系统内存监控</span>
+    <p>IxNetwork 服务端在内存不足时会发出 <code class="inline">[System's available memory is very low]</code> 警告。如果系统可用内存低于 10%，应先清理不必要的配置或重启 session 再继续操作，避免服务端崩溃。</p>
+  </div>
+
+  <div class="callout callout-warn">
+    <span class="callout-title">8. ProtocolTemplate.find() 匹配方式</span>
+    <p>获取协议模板时使用 <code class="inline">StackTypeId</code> 参数（如 <code class="inline">'ipv4'</code>、<code class="inline">'tcp'</code>），而非 <code class="inline">DisplayName</code>。部分旧示例脚本使用 <code class="inline">DisplayName='TCP'</code> 的写法，在较新版本中可能匹配不到，推荐统一使用 <code class="inline">StackTypeId</code>。</p>
+  </div>
+
+  <div class="callout callout-warn">
+    <span class="callout-title">9. 端口统计读取时机</span>
+    <p>启动流量后需要等待一段时间（如 10 秒）让计数器积累，否则可能读到 0 值。<code class="inline">StatViewAssistant</code> 的 <code class="inline">Timeout</code> 参数控制等待视图就绪的最长时间，不是等待流量发送的时间。</p>
+  </div>
+</section>
+
+<!-- References -->
+<section id="references">
+  <h2>参考来源</h2>
+  <ol class="ref-list">
+    <li>OpenIxia ixnetwork_restpy GitHub README — 安装、SessionAssistant、PortMapAssistant、TrafficItem 示例入口<br><a href="https://github.com/OpenIxia/ixnetwork_restpy/blob/master/README.md" target="_blank">https://github.com/OpenIxia/ixnetwork_restpy/blob/master/README.md</a></li>
+    <li>SessionAssistant 源码 — Session 创建、PortMapAssistant、StatViewAssistant 接口定义<br><a href="https://github.com/OpenIxia/ixnetwork_restpy/blob/master/ixnetwork_restpy/assistants/sessions/sessionassistant.py" target="_blank">https://github.com/OpenIxia/ixnetwork_restpy/blob/master/ixnetwork_restpy/assistants/sessions/sessionassistant.py</a></li>
+    <li>PortMapAssistant 源码 — Map() 和 Connect() 接口定义<br><a href="https://github.com/OpenIxia/ixnetwork_restpy/blob/master/ixnetwork_restpy/assistants/ports/portmapassistant.py" target="_blank">https://github.com/OpenIxia/ixnetwork_restpy/blob/master/ixnetwork_restpy/assistants/ports/portmapassistant.py</a></li>
+    <li>官方示例 createTrafficItemAddPacketHeader.py — ProtocolTemplate + Append 标准写法<br><a href="https://github.com/OpenIxia/IxNetwork/blob/master/RestPy/SampleScripts/createTrafficItemAddPacketHeader.py" target="_blank">https://github.com/OpenIxia/IxNetwork/blob/master/RestPy/SampleScripts/createTrafficItemAddPacketHeader.py</a></li>
+    <li>官方示例 pcapToRawTrafficItem.py — Ethernet/IPv4/TCP Stack 与 Field 操作<br><a href="https://github.com/OpenIxia/IxNetwork/blob/master/RestPy/SampleScripts/pcapToRawTrafficItem.py" target="_blank">https://github.com/OpenIxia/IxNetwork/blob/master/RestPy/SampleScripts/pcapToRawTrafficItem.py</a></li>
+    <li>GitHub Issue #138 — InstanceId is not a string 错误记录<br><a href="https://github.com/OpenIxia/IxNetwork/issues/138" target="_blank">https://github.com/OpenIxia/IxNetwork/issues/138</a></li>
+    <li>GitHub Issue #47 — TCP stack 添加后端口字段更新问题<br><a href="https://github.com/OpenIxia/IxNetwork/issues/47" target="_blank">https://github.com/OpenIxia/IxNetwork/issues/47</a></li>
+    <li>RestPy Release Notes — BatchUpdate 功能说明<br><a href="https://github.com/OpenIxia/ixnetwork_restpy/blob/master/RELEASENOTES.md" target="_blank">https://github.com/OpenIxia/ixnetwork_restpy/blob/master/RELEASENOTES.md</a></li>
+    <li>Stack 类源码 — Stack.find()、Append()、Field 属性定义<br><a href="https://github.com/OpenIxia/ixnetwork_restpy/blob/master/ixnetwork_restpy/testplatform/sessions/ixnetwork/traffic/trafficitem/configelement/stack/stack.py" target="_blank">https://github.com/OpenIxia/ixnetwork_restpy/blob/master/.../stack/stack.py</a></li>
+    <li>Field 类源码 — ValueType、StartValue、StepValue、CountValue、ValueList 属性定义<br><a href="https://github.com/OpenIxia/ixnetwork_restpy/blob/master/ixnetwork_restpy/testplatform/sessions/ixnetwork/traffic/trafficitem/configelement/stack/field/field.py" target="_blank">https://github.com/OpenIxia/ixnetwork_restpy/blob/master/.../stack/field/field.py</a></li>
+    <li>OpenIxia RestPy 在线文档 — Overview / Samples / API Reference<br><a href="https://openixia.github.io/ixnetwork_restpy/#/overview" target="_blank">https://openixia.github.io/ixnetwork_restpy/#/overview</a></li>
+    <li>OpenIxia IxNetwork RestPy 示例脚本目录<br><a href="https://github.com/OpenIxia/IxNetwork/tree/master/RestPy/SampleScripts" target="_blank">https://github.com/OpenIxia/IxNetwork/tree/master/RestPy/SampleScripts</a></li>
+  </ol>
+</section>
+
+<div class="footer">
+  <p>本文档基于 IxNetwork 9.20.2112.6 + ixnetwork-restpy 1.12.1 环境编写 | 2026-09-11</p>
+</div>
+
+</div>
+
+</body>
+</html>
